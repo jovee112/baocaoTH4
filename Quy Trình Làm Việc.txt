@@ -1,0 +1,45 @@
+1. Lấy code mới nhất (Mỗi khi bắt đầu làm)
+Trước khi code bất cứ thứ gì, hãy đảm bảo bạn đang có bản mới nhất từ Leader:
+
+ Chạy trong terminal:
+git checkout main
+git pull origin main
+
+
+2. Tạo nhánh riêng (Bắt buộc)
+Tuyệt đối không code trực tiếp trên nhánh main. Mỗi người làm một nhiệm vụ thì tạo một nhánh riêng:
+
+Ví dụ: git checkout -b feature/home-page (Nếu làm trang chủ)
+
+
+3. Cách dùng AI Agent (Copilot/Cursor) để gen code chuẩn
+Để AI gen code khớp với bộ khung của Leader, các bạn làm theo 3 bước:
+
+Bước 1 - Mở Context: Trước khi gõ Prompt, hãy mở file lib/models/product_model.dart và lib/providers/cart_provider.dart. (Việc này giúp AI biết tên biến để gen code không bị lỗi đỏ).
+
+Bước 2 - Gõ Prompt chi tiết: Đừng yêu cầu chung chung. Hãy dùng các Prompt mẫu mà Leader đã gửi (Ví dụ: "Sử dụng ProductModel để hiển thị GridView...").
+
+Bước 3 - Kiểm tra & Format: * Sau khi AI gen xong, nhấn Shift + Alt + F để định dạng lại code.
+
+Đảm bảo không có dòng gạch đỏ nào trước khi lưu.
+
+
+4. Đẩy code lên để Leader duyệt
+Sau khi làm xong tính năng và test chạy ổn trên máy cá nhân:
+
+Chạy trong terminal:
+git add .
+git commit -m "Hoàn thành: [Tên tính năng bạn làm]"
+git push origin [ten-nhanh-cua-ban]
+
+Sau đó, lên GitHub nhấn nút "Compare & Pull Request" để Leader kiểm tra code và gộp vào bản chính.
+
+
+
+
+Một số lưu ý quan trọng:
+Hạn chế sửa file main.dart: Leader đã cài đặt sẵn Route. Bạn chỉ cần code trong đúng thư mục màn hình của mình.
+
+Lỗi thư viện: Nếu thấy gạch đỏ ở các dòng import, hãy chạy lệnh flutter pub get ở Terminal.
+
+Tên biến: Luôn ưu tiên dùng các hàm có sẵn trong CartProvider mà Leader đã viết (như addToCart, totalAmount).

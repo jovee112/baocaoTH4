@@ -1,0 +1,46 @@
+Mở file product_model.dart và cart_provider.dart lên trước khi dán prompt vào Agent.
+
+1. Prompt cho Thành viên 2 (Trang Chủ - Home)
+"Hãy tạo màn hình HomeScreen sử dụng CustomScrollView và SliverAppBar.
+
+AppBar: Có thanh SearchBar dính trên đỉnh (sticky), đổi màu khi cuộn, góc phải có Badge hiển thị cart.items.length từ CartProvider.
+
+Banner: Thêm CarouselSlider tự động chạy với 3 ảnh banner.
+
+Body: Hiển thị danh sách sản phẩm bằng SliverGrid (2 cột).
+
+Logic: Tích hợp RefreshIndicator để Pull-to-Refresh và thêm bộ lắng nghe cuộn (ScrollController) để thực hiện Infinite Scrolling (tải thêm dữ liệu khi cuộn đến đáy).
+
+Card: Mỗi sản phẩm có tag 'Mall', ảnh có loadingBuilder, và giá tiền format đúng định dạng tiền tệ."
+
+
+
+
+2. Prompt cho Thành viên 3 (Chi tiết - Detail)
+"Thiết kế màn hình ProductDetailScreen nhận vào đối tượng ProductModel.
+
+Hiệu ứng: Sử dụng widget Hero bọc quanh ảnh sản phẩm để khớp với trang chủ.
+
+Nội dung: Hiển thị slider ảnh, giá đỏ (to), giá gốc gạch ngang, và đoạn mô tả có tính năng 'Xem thêm/Thu gọn'.
+
+Bottom Bar: Có 2 nút 'Thêm vào giỏ' và 'Mua ngay'.
+
+Logic BottomSheet: Khi bấm 'Thêm vào giỏ', hiện một showModalBottomSheet. Trong đó cho phép chọn Size (S, M, L), Màu sắc và số lượng (+/-). Khi bấm 'Xác nhận', hãy gọi cartProvider.addToCart() và hiển thị SnackBar thông báo thành công."
+
+3. Prompt cho Thành viên 4 (Giỏ Hàng - Cart)
+"Xây dựng CartScreen lắng nghe từ CartProvider.
+
+Danh sách: Sử dụng ListView.builder, mỗi item có thể vuốt để xóa (Dismissible).
+
+Logic Checkbox: >   1. Mỗi sản phẩm có 1 checkbox riêng.
+2. Có 1 checkbox 'Chọn tất cả' ở Bottom Bar.
+3. Nếu bỏ tick 1 cái thì 'Chọn tất cả' tắt. Nếu tick đủ tất cả thì 'Chọn tất cả' tự sáng.
+
+Thanh toán: Hiển thị tổng tiền ở Bottom Bar nhưng CHỈ tính tổng của các sản phẩm đã được tick checkbox. Khi bấm tăng/giảm số lượng, tổng tiền phải cập nhật realtime."
+
+
+
+4. Prompt cho Thành viên 5 (Thanh toán & Đơn mua)
+"1. Tạo màn hình CheckoutScreen nhận danh sách các item đã chọn từ Giỏ hàng. Hiển thị tổng tiền, form nhập địa chỉ và phương thức thanh toán. Khi đặt hàng thành công, gọi hàm xóa các item đó trong CartProvider và dùng Navigator.popUntil để về trang chủ.
+2. Tạo màn hình OrderHistoryScreen sử dụng DefaultTabController với 4 Tabs: 'Chờ xác nhận', 'Đang giao', 'Đã giao', 'Đã hủy'.
+3. Sử dụng thư viện shared_preferences để lưu lại danh sách đơn hàng đã đặt xuống bộ nhớ máy để xem lại sau khi tắt App."
