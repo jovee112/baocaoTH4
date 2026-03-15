@@ -22,9 +22,9 @@ class ProductCard extends StatelessWidget {
   String _buildSoldText() {
     final sold = (product.count ?? 0) + (product.id * 37);
     if (sold >= 1000) {
-      return 'Da ban ${(sold / 1000).toStringAsFixed(1)}k';
+      return 'Đã bán ${(sold / 1000).toStringAsFixed(1)}k';
     }
-    return 'Da ban $sold';
+    return 'Đã bán $sold';
   }
 
   @override

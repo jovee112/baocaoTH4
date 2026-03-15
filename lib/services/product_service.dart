@@ -14,7 +14,7 @@ class ProductService {
     final response = await http.get(Uri.parse(_baseUrl));
 
     if (response.statusCode != 200) {
-      throw Exception('Loi khi tai danh sach san pham');
+      throw Exception('Lỗi khi tải danh sách sản phẩm');
     }
 
     final List<dynamic> data = jsonDecode(response.body) as List<dynamic>;

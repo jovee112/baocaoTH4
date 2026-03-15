@@ -6,7 +6,6 @@ import '../../models/product_model.dart';
 import '../../providers/cart_providers.dart';
 import '../../services/product_service.dart';
 import '../../widgets/product_card.dart';
-import '../detail/detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,24 +23,68 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Map<String, String>> _banners = const [
     {
-      'title': 'Sieu Sale 3.3',
-      'subtitle': 'Gia tu 19k - Freeship toan quoc',
+      'title': 'Siêu Sale 3.3',
+      'subtitle': 'Giá từ 19k - Freeship toàn quốc',
       'color': '0xFFEE4D2D',
     },
     {
-      'title': 'Deal thuong hieu',
-      'subtitle': 'Giam toi 50% cho Mall chinh hang',
+      'title': 'Deal thương hiệu',
+      'subtitle': 'Giảm tới 50% cho Mall chính hãng',
       'color': '0xFFFF7A00',
     },
     {
-      'title': 'Voucher moi ngay',
-      'subtitle': 'Don dau tu 99k la co voucher',
+      'title': 'Voucher mỗi ngày',
+      'subtitle': 'Đơn đầu từ 99k là có voucher',
       'color': '0xFF0F9D58',
     },
     {
-      'title': 'Khung gio vang',
-      'subtitle': '12h - 14h san deal cuc soc',
+      'title': 'Khung giờ vàng',
+      'subtitle': '12h - 14h săn deal cực sốc',
       'color': '0xFF1E88E5',
+    },
+  ];
+
+  final List<Map<String, dynamic>> _categories = const [
+    {'icon': Icons.grid_view_rounded, 'label': 'Tất cả', 'filters': <String>[]},
+    {
+      'icon': Icons.checkroom,
+      'label': 'Thời trang',
+      'filters': <String>['clothing'],
+    },
+    {
+      'icon': Icons.phone_android,
+      'label': 'Điện thoại',
+      'filters': <String>['electronics', 'phone'],
+    },
+    {
+      'icon': Icons.face_retouching_natural,
+      'label': 'Mỹ phẩm',
+      'filters': <String>['jewelery', 'beauty', 'cosmetic'],
+    },
+    {
+      'icon': Icons.kitchen,
+      'label': 'Gia dụng',
+      'filters': <String>['electronics', 'home', 'kitchen'],
+    },
+    {
+      'icon': Icons.watch,
+      'label': 'Phụ kiện',
+      'filters': <String>['jewelery', 'watch', 'accessory'],
+    },
+    {
+      'icon': Icons.sports_esports,
+      'label': 'Giải trí',
+      'filters': <String>['electronics', 'gaming'],
+    },
+    {
+      'icon': Icons.menu_book,
+      'label': 'Sách',
+      'filters': <String>['book']
+    },
+    {
+      'icon': Icons.sports_basketball,
+      'label': 'Thể thao',
+      'filters': <String>['sport'],
     },
   ];
 
@@ -49,11 +92,42 @@ class _HomeScreenState extends State<HomeScreen> {
   List<ProductModel> filteredProducts = <ProductModel>[];
   int _currentPage = 1;
   int _currentBanner = 0;
+  String _selectedCategory = 'Tất cả';
 
   bool _isInitialLoading = false;
   bool _isLoadingMore = false;
   bool _hasMoreData = true;
   bool _isScrolled = false;
+
+  List<ProductModel> _filterProducts(List<ProductModel> source) {
+    final searchText = searchController.text.trim().toLowerCase();
+    final selectedCategory = _categories.firstWhere(
+      (category) => category['label'] == _selectedCategory,
+      orElse: () => _categories.first,
+    );
+    final filters = List<String>.from(
+      selectedCategory['filters'] as List<dynamic>? ?? <dynamic>[],
+    );
+
+    return source.where((product) {
+      final titleMatch = searchText.isEmpty ||
+          product.title.toLowerCase().contains(searchText);
+      final categoryText = product.category.toLowerCase();
+      final categoryMatch =
+          filters.isEmpty || filters.any((key) => categoryText.contains(key));
+      return titleMatch && categoryMatch;
+    }).toList();
+  }
+
+  void _onCategorySelected(String label) {
+    if (_selectedCategory == label) {
+      return;
+    }
+    setState(() {
+      _selectedCategory = label;
+      filteredProducts = _filterProducts(products);
+    });
+  }
 
   @override
   void initState() {
@@ -87,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       setState(() {
         this.products = products;
-        filteredProducts = products;
+        filteredProducts = _filterProducts(products);
         _hasMoreData = products.length == _pageSize;
       });
     } catch (e) {
@@ -95,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Khong the tai san pham: $e')),
+        SnackBar(content: Text('Không thể tải sản phẩm: $e')),
       );
     } finally {
       if (mounted) {
@@ -125,13 +199,7 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _currentPage = nextPage;
         products.addAll(moreProducts);
-        filteredProducts = products
-            .where(
-              (product) => product.title.toLowerCase().contains(
-                    searchController.text.toLowerCase(),
-                  ),
-            )
-            .toList();
+        filteredProducts = _filterProducts(products);
         _hasMoreData = moreProducts.length == _pageSize;
       });
     } catch (e) {
@@ -139,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Khong the tai them san pham: $e')),
+        SnackBar(content: Text('Không thể tải thêm sản phẩm: $e')),
       );
     } finally {
       if (mounted) {
@@ -154,20 +222,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onSearchChanged(String searchText) {
     setState(() {
-      filteredProducts = products
-          .where(
-            (product) => product.title.toLowerCase().contains(
-                  searchText.toLowerCase(),
-                ),
-          )
-          .toList();
+      filteredProducts = _filterProducts(products);
     });
   }
 
   void _clearSearch() {
     searchController.clear();
     setState(() {
-      filteredProducts = products;
+      filteredProducts = _filterProducts(products);
     });
   }
 
@@ -182,8 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    final threshold = _scrollController.position.maxScrollExtent - 280;
-    if (_scrollController.position.pixels >= threshold) {
+    if (_scrollController.position.extentAfter < 320) {
       _loadMoreProducts();
     }
   }
@@ -202,6 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
           slivers: [
             _buildSliverAppBar(context),
             SliverToBoxAdapter(child: _buildBannerSection()),
+            SliverToBoxAdapter(child: _buildCategorySection()),
             if (_isInitialLoading)
               const SliverFillRemaining(
                 hasScrollBody: false,
@@ -210,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
             else if (filteredProducts.isEmpty)
               const SliverFillRemaining(
                 hasScrollBody: false,
-                child: Center(child: Text('Khong tim thay san pham nao')),
+                child: Center(child: Text('Không tìm thấy sản phẩm nào')),
               )
             else
               SliverPadding(
@@ -222,12 +284,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       return ProductCard(
                         product: product,
                         onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => ProductDetailScreen(
-                                product: product,
-                              ),
-                            ),
+                          Navigator.of(context).pushNamed(
+                            '/detail',
+                            arguments: product,
                           );
                         },
                       );
@@ -249,7 +308,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 alignment: Alignment.center,
                 child: _isLoadingMore
                     ? const CircularProgressIndicator(strokeWidth: 2)
-                    : null,
+                    : (!_hasMoreData && filteredProducts.isNotEmpty
+                        ? const Text(
+                            'Đã hiển thị tất cả sản phẩm',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          )
+                        : null),
               ),
             ),
           ],
@@ -347,133 +415,256 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildCategorySection() {
+    const spacing = 8.0;
+    const sectionHeight = 140.0;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+      child: SizedBox(
+        height: sectionHeight,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final totalColumns = (_categories.length / 2).ceil();
+            const int visibleColumns = 4;
+            final cardWidth =
+                (constraints.maxWidth - spacing * (visibleColumns - 1)) /
+                    visibleColumns;
+            final contentWidth =
+                totalColumns * cardWidth + (totalColumns - 1) * spacing;
+            final canScroll = contentWidth > constraints.maxWidth;
+
+            final row = Row(
+              children: List.generate(totalColumns, (columnIndex) {
+                final topIndex = columnIndex;
+                final bottomIndex = columnIndex + totalColumns;
+
+                return Padding(
+                  padding: EdgeInsets.only(
+                    right: columnIndex == totalColumns - 1 ? 0 : spacing,
+                  ),
+                  child: SizedBox(
+                    width: cardWidth,
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: _buildCategoryCard(_categories[topIndex]),
+                        ),
+                        const SizedBox(height: spacing),
+                        Expanded(
+                          child: bottomIndex < _categories.length
+                              ? _buildCategoryCard(_categories[bottomIndex])
+                              : const SizedBox.shrink(),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            );
+
+            if (canScroll) {
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: SizedBox(width: contentWidth, child: row),
+              );
+            }
+
+            return row;
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryCard(Map<String, dynamic> category) {
+    final label = category['label'] as String;
+    final isSelected = label == _selectedCategory;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => _onCategorySelected(label),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? const Color(0xFFEE4D2D).withOpacity(0.12)
+                : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color:
+                  isSelected ? const Color(0xFFEE4D2D) : Colors.grey.shade200,
+              width: isSelected ? 1.4 : 1,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                category['icon'] as IconData,
+                size: 20,
+                color: isSelected
+                    ? const Color(0xFFEE4D2D)
+                    : const Color(0xFFEE4D2D),
+              ),
+              const SizedBox(height: 4),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: isSelected
+                        ? const Color(0xFFEE4D2D)
+                        : Colors.grey.shade800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   SliverAppBar _buildSliverAppBar(BuildContext context) {
-    final baseColor = _isScrolled ? const Color(0xFFEE4D2D) : Colors.white;
+    final baseColor =
+        _isScrolled ? const Color(0xFFEE4D2D) : Colors.transparent;
     final iconColor = _isScrolled ? Colors.white : const Color(0xFF222222);
     final hintColor =
         _isScrolled ? Colors.white.withOpacity(0.95) : Colors.grey.shade700;
 
     return SliverAppBar(
+      title: Text(
+        'TH4 - Nhóm 4',
+        style: TextStyle(color: iconColor, fontWeight: FontWeight.w700),
+      ),
       pinned: true,
       floating: false,
       snap: false,
-      expandedHeight: 90,
+      toolbarHeight: 48,
       elevation: _isScrolled ? 2 : 0,
       backgroundColor: baseColor,
       surfaceTintColor: Colors.transparent,
       automaticallyImplyLeading: false,
-      flexibleSpace: FlexibleSpaceBar(
-        background: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: _isScrolled
-                          ? Colors.white.withOpacity(0.18)
-                          : const Color(0xFFF1F1F1),
-                      borderRadius: BorderRadius.circular(999),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(56),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 4, 12, 10),
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _isScrolled
+                        ? Colors.white.withOpacity(0.18)
+                        : const Color(0xFFF1F1F1),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: TextField(
+                    controller: searchController,
+                    onChanged: _onSearchChanged,
+                    cursorColor:
+                        _isScrolled ? Colors.white : const Color(0xFFEE4D2D),
+                    style: TextStyle(
+                      color: _isScrolled ? Colors.white : Colors.black87,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
-                    child: TextField(
-                      controller: searchController,
-                      onChanged: _onSearchChanged,
-                      cursorColor:
-                          _isScrolled ? Colors.white : const Color(0xFFEE4D2D),
-                      style: TextStyle(
-                        color: _isScrolled ? Colors.white : Colors.black87,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'Tìm kiếm sản phẩm...',
+                      hintStyle: TextStyle(
+                        color: hintColor,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Tim kiem san pham...',
-                        hintStyle: TextStyle(
-                          color: hintColor,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: hintColor,
-                          size: 20,
-                        ),
-                        prefixIconConstraints: const BoxConstraints(
-                          minHeight: 20,
-                          minWidth: 36,
-                        ),
-                        suffixIcon: searchController.text.isNotEmpty
-                            ? IconButton(
-                                onPressed: _clearSearch,
-                                icon: Icon(
-                                  Icons.close,
-                                  color: hintColor,
-                                  size: 18,
-                                ),
-                                tooltip: 'Xoa tim kiem',
-                              )
-                            : null,
-                        contentPadding: const EdgeInsets.only(top: 10),
-                        isDense: true,
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: hintColor,
+                        size: 20,
                       ),
+                      prefixIconConstraints: const BoxConstraints(
+                        minHeight: 20,
+                        minWidth: 36,
+                      ),
+                      suffixIcon: searchController.text.isNotEmpty
+                          ? IconButton(
+                              onPressed: _clearSearch,
+                              icon: Icon(
+                                Icons.close,
+                                color: hintColor,
+                                size: 18,
+                              ),
+                              tooltip: 'Xóa tìm kiếm',
+                            )
+                          : null,
+                      contentPadding: const EdgeInsets.only(top: 10),
+                      isDense: true,
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Selector<CartProvider, int>(
-                  selector: (_, cart) => cart.totalItems,
-                  builder: (context, totalItems, _) {
-                    return Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        IconButton(
-                          tooltip: 'Gio hang',
-                          onPressed: () {
-                            Navigator.of(context).pushNamed('/cart');
-                          },
-                          icon: Icon(
-                            Icons.shopping_cart_outlined,
-                            color: iconColor,
-                            size: 28,
-                          ),
+              ),
+              const SizedBox(width: 10),
+              Selector<CartProvider, int>(
+                selector: (_, cart) => cart.totalProductTypes,
+                builder: (context, totalItems, _) {
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      IconButton(
+                        tooltip: 'Giỏ hàng',
+                        onPressed: () {
+                          Navigator.of(context).pushNamed('/cart');
+                        },
+                        icon: Icon(
+                          Icons.shopping_cart_outlined,
+                          color: iconColor,
+                          size: 28,
                         ),
-                        if (totalItems > 0)
-                          Positioned(
-                            right: 4,
-                            top: 2,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
+                      ),
+                      if (totalItems > 0)
+                        Positioned(
+                          right: 4,
+                          top: 2,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _isScrolled
+                                  ? Colors.white
+                                  : const Color(0xFFEE4D2D),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            constraints: const BoxConstraints(minWidth: 18),
+                            child: Text(
+                              totalItems > 99 ? '99+' : '$totalItems',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
                                 color: _isScrolled
-                                    ? Colors.white
-                                    : const Color(0xFFEE4D2D),
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                              constraints: const BoxConstraints(minWidth: 18),
-                              child: Text(
-                                totalItems > 99 ? '99+' : '$totalItems',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: _isScrolled
-                                      ? const Color(0xFFEE4D2D)
-                                      : Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                                    ? const Color(0xFFEE4D2D)
+                                    : Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
-                      ],
-                    );
-                  },
-                ),
-              ],
-            ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ),

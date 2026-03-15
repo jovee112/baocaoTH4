@@ -31,13 +31,21 @@ class CartScreen extends StatelessWidget {
     return result ?? false;
   }
 
-  String _buildVariantText(int productId) {
-    final variants = [
-      'Size M / Màu Đen',
-      'Size L / Màu Trắng',
-      'Size S / Màu Xanh'
-    ];
-    return variants[productId % variants.length];
+  String _buildVariantText(CartItem item) {
+    final hasSize = item.selectedSize != null && item.selectedSize!.isNotEmpty;
+    final hasColor =
+        item.selectedColor != null && item.selectedColor!.isNotEmpty;
+
+    if (hasSize && hasColor) {
+      return 'Size ${item.selectedSize} / Màu ${item.selectedColor}';
+    }
+    if (hasSize) {
+      return 'Size ${item.selectedSize}';
+    }
+    if (hasColor) {
+      return 'Màu ${item.selectedColor}';
+    }
+    return 'Mặc định';
   }
 
   @override
@@ -59,9 +67,11 @@ class CartScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final item = cartProvider.items[index];
                 final product = item.product;
+                final itemKey =
+                    '${product.id}-${item.selectedSize ?? '-'}-${item.selectedColor ?? '-'}';
 
                 return Dismissible(
-                  key: ValueKey(product.id),
+                  key: ValueKey(itemKey),
                   direction: DismissDirection.endToStart,
                   background: Container(
                     alignment: Alignment.centerRight,
@@ -73,7 +83,7 @@ class CartScreen extends StatelessWidget {
                     child: const Icon(Icons.delete, color: Colors.white),
                   ),
                   onDismissed: (_) {
-                    cartProvider.removeFromCart(product.id);
+                    cartProvider.removeFromCartByVariant(item);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Đã xóa ${product.title}')),
                     );
@@ -92,7 +102,7 @@ class CartScreen extends StatelessWidget {
                             value: item.isSelected,
                             onChanged: (value) {
                               if (value != null && value != item.isSelected) {
-                                cartProvider.toggleItemSelection(product.id);
+                                cartProvider.toggleItemSelectionByVariant(item);
                               }
                             },
                           ),
@@ -129,7 +139,7 @@ class CartScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Phân loại: ${_buildVariantText(product.id)}',
+                                  'Phân loại: ${_buildVariantText(item)}',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey.shade700,
@@ -158,8 +168,8 @@ class CartScreen extends StatelessWidget {
                                           }
                                         }
 
-                                        cartProvider.updateQuantity(
-                                          product.id,
+                                        cartProvider.updateQuantityByVariant(
+                                          item,
                                           item.quantity - 1,
                                         );
                                       },
@@ -175,8 +185,8 @@ class CartScreen extends StatelessWidget {
                                     ),
                                     IconButton(
                                       onPressed: () {
-                                        cartProvider.updateQuantity(
-                                          product.id,
+                                        cartProvider.updateQuantityByVariant(
+                                          item,
                                           item.quantity + 1,
                                         );
                                       },
