@@ -19,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ProductService _productService = ProductService();
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController searchController = TextEditingController();
 
   static const int _pageSize = 8;
 
@@ -45,7 +46,8 @@ class _HomeScreenState extends State<HomeScreen> {
     },
   ];
 
-  List<ProductModel> _products = <ProductModel>[];
+  List<ProductModel> products = <ProductModel>[];
+  List<ProductModel> filteredProducts = <ProductModel>[];
   int _currentPage = 1;
   int _currentBanner = 0;
 
@@ -65,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    searchController.dispose();
     super.dispose();
   }
 
@@ -84,7 +87,8 @@ class _HomeScreenState extends State<HomeScreen> {
         return;
       }
       setState(() {
-        _products = products;
+        this.products = products;
+        filteredProducts = products;
         _hasMoreData = products.length == _pageSize;
       });
     } catch (e) {
@@ -121,7 +125,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
       setState(() {
         _currentPage = nextPage;
-        _products.addAll(moreProducts);
+        products.addAll(moreProducts);
+        filteredProducts = products
+            .where(
+              (product) => product.title.toLowerCase().contains(
+                    searchController.text.toLowerCase(),
+                  ),
+            )
+            .toList();
         _hasMoreData = moreProducts.length == _pageSize;
       });
     } catch (e) {
@@ -140,6 +151,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _refreshProducts() async {
     await _loadInitialProducts();
+  }
+
+  void _onSearchChanged(String searchText) {
+    setState(() {
+      filteredProducts = products
+          .where(
+            (product) => product.title.toLowerCase().contains(
+                  searchText.toLowerCase(),
+                ),
+          )
+          .toList();
+    });
+  }
+
+  void _clearSearch() {
+    searchController.clear();
+    setState(() {
+      filteredProducts = products;
+    });
   }
 
   void _onScroll() {
@@ -178,10 +208,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 hasScrollBody: false,
                 child: Center(child: CircularProgressIndicator()),
               )
-            else if (_products.isEmpty)
+            else if (filteredProducts.isEmpty)
               const SliverFillRemaining(
                 hasScrollBody: false,
-                child: Center(child: Text('Khong co san pham nao')),
+                child: Center(child: Text('Khong tim thay san pham nao')),
               )
             else
               SliverPadding(
@@ -189,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 sliver: SliverGrid(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      final product = _products[index];
+                      final product = filteredProducts[index];
                       return ProductCard(
                         product: product,
                         onTap: () {
@@ -203,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                       );
                     },
-                    childCount: _products.length,
+                    childCount: filteredProducts.length,
                   ),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
@@ -349,20 +379,47 @@ class _HomeScreenState extends State<HomeScreen> {
                           : const Color(0xFFF1F1F1),
                       borderRadius: BorderRadius.circular(999),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Row(
-                      children: [
-                        Icon(Icons.search, color: hintColor, size: 20),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Tim kiem san pham...',
-                          style: TextStyle(
-                            color: hintColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
+                    child: TextField(
+                      controller: searchController,
+                      onChanged: _onSearchChanged,
+                      cursorColor:
+                          _isScrolled ? Colors.white : const Color(0xFFEE4D2D),
+                      style: TextStyle(
+                        color: _isScrolled ? Colors.white : Colors.black87,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Tim kiem san pham...',
+                        hintStyle: TextStyle(
+                          color: hintColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
                         ),
-                      ],
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: hintColor,
+                          size: 20,
+                        ),
+                        prefixIconConstraints: const BoxConstraints(
+                          minHeight: 20,
+                          minWidth: 36,
+                        ),
+                        suffixIcon: searchController.text.isNotEmpty
+                            ? IconButton(
+                                onPressed: _clearSearch,
+                                icon: Icon(
+                                  Icons.close,
+                                  color: hintColor,
+                                  size: 18,
+                                ),
+                                tooltip: 'Xoa tim kiem',
+                              )
+                            : null,
+                        contentPadding: const EdgeInsets.only(top: 10),
+                        isDense: true,
+                      ),
                     ),
                   ),
                 ),
