@@ -5,11 +5,15 @@ class CartItem {
   final ProductModel product;
   int quantity;
   bool isSelected; // THÊM: Trạng thái tick chọn để tính tiền
+  String? selectedSize; // THÊM: Kích thước được chọn (S, M, L)
+  String? selectedColor; // THÊM: Màu sắc được chọn
 
   CartItem({
     required this.product,
     this.quantity = 1,
     this.isSelected = true, // Mặc định khi thêm vào là đã chọn
+    this.selectedSize,
+    this.selectedColor,
   });
 }
 

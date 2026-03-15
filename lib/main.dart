@@ -33,11 +33,19 @@ class MyApp extends StatelessWidget {
       ),
 
       // Thiết lập bảng điều hướng (Routing)
-      initialRoute: '/cart',
+      initialRoute: '/',
       routes: {
         '/': (context) => const HomeScreen(),
-        '/detail': (context) => const ProductDetailScreen(),
         '/cart': (context) => const CartScreen(),
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/detail') {
+          final product = settings.arguments;
+          return MaterialPageRoute(
+            builder: (context) => ProductDetailScreen(product: product as dynamic),
+          );
+        }
+        return null;
       },
     );
   }
