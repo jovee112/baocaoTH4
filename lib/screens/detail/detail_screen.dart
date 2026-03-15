@@ -50,6 +50,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     ];
   }
 
+  // Check xem sản phẩm có cho phép chọn size/color hay không
+  bool get _isClothing =>
+      widget.product.category.toLowerCase().contains('clothing');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -458,105 +462,108 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // ===== SIZE SELECTION =====
-                    const Text(
-                      'Kích thước',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                    // ===== SIZE & COLOR - CHỈ HIỂN THỊ NẾUQUẦN/ÁO =====
+                    if (_isClothing) ...[
+                      // SIZE SELECTION
+                      const Text(
+                        'Kích thước',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      children: sizes.map((size) {
-                        final isSelected = tempSelectedSize == size;
-                        return GestureDetector(
-                          onTap: () {
-                            setStateSheet(() => tempSelectedSize = size);
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: isSelected ? Colors.red : Colors.grey[300]!,
-                                width: isSelected ? 2 : 1,
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 8,
+                        children: sizes.map((size) {
+                          final isSelected = tempSelectedSize == size;
+                          return GestureDetector(
+                            onTap: () {
+                              setStateSheet(() => tempSelectedSize = size);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
                               ),
-                              borderRadius: BorderRadius.circular(6),
-                              color: isSelected
-                                  ? Colors.red.withOpacity(0.1)
-                                  : Colors.transparent,
-                            ),
-                            child: Text(
-                              size,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: isSelected ? Colors.red : Colors.black,
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // ===== COLOR SELECTION =====
-                    const Text(
-                      'Màu sắc',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 8,
-                      children: List.generate(colors.length, (index) {
-                        final color = colors[index];
-                        final colorValue = colorValues[index];
-                        final isSelected = tempSelectedColor == color;
-
-                        return GestureDetector(
-                          onTap: () {
-                            setStateSheet(() => tempSelectedColor = color);
-                          },
-                          child: Column(
-                            children: [
-                              Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: colorValue,
-                                  border: Border.all(
-                                    color: isSelected ? Colors.red : Colors.grey[300]!,
-                                    width: isSelected ? 3 : 2,
-                                  ),
-                                  borderRadius: BorderRadius.circular(6),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: isSelected ? Colors.red : Colors.grey[300]!,
+                                  width: isSelected ? 2 : 1,
                                 ),
-                                child: isSelected
-                                    ? const Icon(
-                                        Icons.check,
-                                        color: Colors.white,
-                                        size: 24,
-                                      )
-                                    : null,
+                                borderRadius: BorderRadius.circular(6),
+                                color: isSelected
+                                    ? Colors.red.withOpacity(0.1)
+                                    : Colors.transparent,
                               ),
-                              const SizedBox(height: 6),
-                              Text(
-                                color,
-                                style: const TextStyle(fontSize: 12),
+                              child: Text(
+                                size,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: isSelected ? Colors.red : Colors.black,
+                                ),
                               ),
-                            ],
-                          ),
-                        );
-                      }),
-                    ),
-                    const SizedBox(height: 20),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // COLOR SELECTION
+                      const Text(
+                        'Màu sắc',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 8,
+                        children: List.generate(colors.length, (index) {
+                          final color = colors[index];
+                          final colorValue = colorValues[index];
+                          final isSelected = tempSelectedColor == color;
+
+                          return GestureDetector(
+                            onTap: () {
+                              setStateSheet(() => tempSelectedColor = color);
+                            },
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: colorValue,
+                                    border: Border.all(
+                                      color: isSelected ? Colors.red : Colors.grey[300]!,
+                                      width: isSelected ? 3 : 2,
+                                    ),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: isSelected
+                                      ? const Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 24,
+                                        )
+                                      : null,
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  color,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
 
                     // ===== QUANTITY SELECTION =====
                     const Text(
@@ -652,7 +659,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'Đã thêm $tempQuantity x ${widget.product.title} vào giỏ',
+                                _isClothing
+                                    ? 'Đã thêm $tempQuantity x ${widget.product.title} (Size: $tempSelectedSize, Màu: $tempSelectedColor) vào giỏ'
+                                    : 'Đã thêm $tempQuantity x ${widget.product.title} vào giỏ',
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
