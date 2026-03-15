@@ -6,7 +6,6 @@ import '../../models/product_model.dart';
 import '../../providers/cart_providers.dart';
 import '../../services/product_service.dart';
 import '../../widgets/product_card.dart';
-import '../cart/cart_screen.dart';
 import '../detail/detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -279,14 +278,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   gradient: LinearGradient(
                     colors: [
                       bannerColor,
-                      bannerColor.withValues(alpha: 0.84),
+                      bannerColor.withOpacity(0.84),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: bannerColor.withValues(alpha: 0.28),
+                      color: bannerColor.withOpacity(0.28),
                       blurRadius: 14,
                       offset: const Offset(0, 6),
                     ),
@@ -351,9 +350,8 @@ class _HomeScreenState extends State<HomeScreen> {
   SliverAppBar _buildSliverAppBar(BuildContext context) {
     final baseColor = _isScrolled ? const Color(0xFFEE4D2D) : Colors.white;
     final iconColor = _isScrolled ? Colors.white : const Color(0xFF222222);
-    final hintColor = _isScrolled
-        ? Colors.white.withValues(alpha: 0.95)
-        : Colors.grey.shade700;
+    final hintColor =
+        _isScrolled ? Colors.white.withOpacity(0.95) : Colors.grey.shade700;
 
     return SliverAppBar(
       pinned: true,
@@ -375,7 +373,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: 40,
                     decoration: BoxDecoration(
                       color: _isScrolled
-                          ? Colors.white.withValues(alpha: 0.18)
+                          ? Colors.white.withOpacity(0.18)
                           : const Color(0xFFF1F1F1),
                       borderRadius: BorderRadius.circular(999),
                     ),
@@ -433,11 +431,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         IconButton(
                           tooltip: 'Gio hang',
                           onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const CartScreen(),
-                              ),
-                            );
+                            Navigator.of(context).pushNamed('/cart');
                           },
                           icon: Icon(
                             Icons.shopping_cart_outlined,
