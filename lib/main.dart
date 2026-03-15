@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 // Import các file vừa tạo
 import 'screens/home/home_screen.dart';
-import 'screens/detail/detail_screen.dart';
 import 'screens/cart/cart_screen.dart';
 import 'providers/cart_providers.dart';
 
@@ -33,10 +32,9 @@ class MyApp extends StatelessWidget {
       ),
 
       // Thiết lập bảng điều hướng (Routing)
-      initialRoute: '/cart',
+      initialRoute: '/',
       routes: {
         '/': (context) => const HomeScreen(),
-        '/detail': (context) => const ProductDetailScreen(),
         '/cart': (context) => const CartScreen(),
       },
     );

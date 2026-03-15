@@ -18,6 +18,10 @@ class CartProvider extends ChangeNotifier {
 
   List<CartItem> get items => _items;
 
+  int get totalItems {
+    return _items.fold<int>(0, (sum, item) => sum + item.quantity);
+  }
+
   // 1. LOGIC TÍNH TIỀN ĐỘNG (Chỉ tính sản phẩm được tick)
   double get totalPrice {
     return _items.fold<double>(
