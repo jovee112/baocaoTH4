@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
       ),
 
       // Thiết lập bảng điều hướng (Routing)
-      initialRoute: '/',
+      initialRoute: '/cart',
       routes: {
         '/': (context) => const HomeScreen(),
         '/detail': (context) => const ProductDetailScreen(),
