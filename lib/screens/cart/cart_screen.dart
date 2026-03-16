@@ -248,7 +248,11 @@ class CartScreen extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               ElevatedButton(
-                onPressed: cartProvider.totalPrice <= 0 ? null : () {},
+                onPressed: cartProvider.totalPrice <= 0
+                    ? null
+                    : () {
+                        Navigator.of(context).pushNamed('/checkout');
+                      },
                 child: const Text('Thanh toán'),
               ),
             ],

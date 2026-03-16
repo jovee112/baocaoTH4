@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../models/product_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CartItem {
   final ProductModel product;
@@ -19,11 +20,72 @@ class CartItem {
 
 class CartProvider extends ChangeNotifier {
   final List<CartItem> _items = [];
+  String? _userId;
+
+  static const String cartCollection = 'carts';
+
+  Future<void> saveCartToFirestore(String userId) async {
+    _userId = userId;
+    final cartData = _items
+        .map((item) => {
+              'product': item.product.toJson(),
+              'quantity': item.quantity,
+              'isSelected': item.isSelected,
+              'selectedSize': item.selectedSize,
+              'selectedColor': item.selectedColor,
+            })
+        .toList();
+    try {
+      await FirebaseFirestore.instance
+          .collection(cartCollection)
+          .doc(userId)
+          .set({
+        'items': cartData,
+      });
+    } catch (e) {
+      debugPrint('Lỗi lưu giỏ hàng: $e');
+    }
+  }
+
+  Future<void> loadCartFromFirestore(String userId) async {
+    _userId = userId;
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection(cartCollection)
+          .doc(userId)
+          .get();
+      if (doc.exists && doc.data() != null) {
+        final items = doc.data()!['items'] as List<dynamic>?;
+        _items.clear();
+        if (items != null) {
+          for (final item in items) {
+            final productJson = item['product'] as Map<String, dynamic>;
+            _items.add(CartItem(
+              product: ProductModel.fromJson(productJson),
+              quantity: item['quantity'] ?? 1,
+              isSelected: item['isSelected'] ?? true,
+              selectedSize: item['selectedSize'],
+              selectedColor: item['selectedColor'],
+            ));
+          }
+        }
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Lỗi tải giỏ hàng: $e');
+    }
+  }
+
+  void syncCart() {
+    if (_userId != null) {
+      saveCartToFirestore(_userId!);
+    }
+  }
 
   List<CartItem> get items => _items;
 
   int get totalItems {
-    return _items.fold<int>(0, (sum, item) => sum + item.quantity);
+    return _items.fold<int>(0, (total, item) => total + item.quantity);
   }
 
   int get totalProductTypes {
@@ -34,8 +96,9 @@ class CartProvider extends ChangeNotifier {
   double get totalPrice {
     return _items.fold<double>(
       0,
-      (sum, item) =>
-          item.isSelected ? sum + (item.product.price * item.quantity) : sum,
+      (total, item) => item.isSelected
+          ? total + (item.product.price * item.quantity)
+          : total,
     );
   }
 
@@ -47,6 +110,7 @@ class CartProvider extends ChangeNotifier {
     for (var item in _items) {
       item.isSelected = value;
     }
+    syncCart();
     notifyListeners();
   }
 
@@ -55,8 +119,16 @@ class CartProvider extends ChangeNotifier {
     final index = _items.indexWhere((item) => item.product.id == productId);
     if (index != -1) {
       _items[index].isSelected = !_items[index].isSelected;
+      syncCart();
       notifyListeners();
     }
+  }
+
+  // XÓA CÁC SẢN PHẨM ĐÃ CHỌN SAU KHI ĐẶT HÀNG
+  void removeSelectedItems() {
+    _items.removeWhere((item) => item.isSelected);
+    syncCart();
+    notifyListeners();
   }
 
   int _findVariantIndex(CartItem target) {
@@ -72,6 +144,7 @@ class CartProvider extends ChangeNotifier {
     final index = _findVariantIndex(target);
     if (index != -1) {
       _items[index].isSelected = !_items[index].isSelected;
+      syncCart();
       notifyListeners();
     }
   }
@@ -82,11 +155,13 @@ class CartProvider extends ChangeNotifier {
 
     if (existingIndex != -1) {
       _items[existingIndex].quantity += 1;
+      syncCart();
       notifyListeners();
       return;
     }
 
     _items.add(CartItem(product: product));
+    syncCart();
     notifyListeners();
   }
 
@@ -116,11 +191,13 @@ class CartProvider extends ChangeNotifier {
       );
     }
 
+    syncCart();
     notifyListeners();
   }
 
   void removeFromCart(int productId) {
     _items.removeWhere((item) => item.product.id == productId);
+    syncCart();
     notifyListeners();
   }
 
@@ -131,6 +208,7 @@ class CartProvider extends ChangeNotifier {
           item.selectedSize == target.selectedSize &&
           item.selectedColor == target.selectedColor,
     );
+    syncCart();
     notifyListeners();
   }
 
@@ -142,6 +220,7 @@ class CartProvider extends ChangeNotifier {
       } else {
         _items[index].quantity = quantity;
       }
+      syncCart();
       notifyListeners();
     }
   }
@@ -154,6 +233,7 @@ class CartProvider extends ChangeNotifier {
       } else {
         _items[index].quantity = quantity;
       }
+      syncCart();
       notifyListeners();
     }
   }
@@ -161,6 +241,7 @@ class CartProvider extends ChangeNotifier {
   // 4. XÓA CÁC MÓN ĐÃ MUA (Dùng cho trang Checkout sau khi bấm Đặt hàng)
   void clearOrderedItems() {
     _items.removeWhere((item) => item.isSelected);
+    syncCart();
     notifyListeners();
   }
 }
