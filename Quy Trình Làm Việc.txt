@@ -12,19 +12,8 @@ Tuyệt đối không code trực tiếp trên nhánh main. Mỗi người làm 
 Ví dụ: git checkout -b feature/home-page (Nếu làm trang chủ)
 
 
-3. Cách dùng AI Agent (Copilot/Cursor) để gen code chuẩn
-Để AI gen code khớp với bộ khung của Leader, các bạn làm theo 3 bước:
 
-Bước 1 - Mở Context: Trước khi gõ Prompt, hãy mở file lib/models/product_model.dart và lib/providers/cart_provider.dart. (Việc này giúp AI biết tên biến để gen code không bị lỗi đỏ).
-
-Bước 2 - Gõ Prompt chi tiết: Đừng yêu cầu chung chung. Hãy dùng các Prompt mẫu mà Leader đã gửi (Ví dụ: "Sử dụng ProductModel để hiển thị GridView...").
-
-Bước 3 - Kiểm tra & Format: * Sau khi AI gen xong, nhấn Shift + Alt + F để định dạng lại code.
-
-Đảm bảo không có dòng gạch đỏ nào trước khi lưu.
-
-
-4. Đẩy code lên để Leader duyệt
+3. Đẩy code lên để Leader duyệt
 Sau khi làm xong tính năng và test chạy ổn trên máy cá nhân:
 
 Chạy trong terminal:

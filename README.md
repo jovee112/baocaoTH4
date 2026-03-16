@@ -1,31 +1,39 @@
-# 🛒 MINI E-COMMERCE APP - BÀI THỰC HÀNH 4
 
-Dự án tổng hợp kiến thức Flutter từ TH1 đến TH3, tập trung vào quản lý trạng thái (State Management) và trải nghiệm người dùng TMĐT chuẩn Shopee/Lazada.
+# 🛒 MINI E-COMMERCE APP
 
-## 👥 THÔNG TIN NHÓM
-- **Tên nhóm:** 4
-- **Thanh AppBar:** `TH4 - Nhóm 4`
-- **Công nghệ sử dụng:** Flutter, Provider (State Management), FakeStore API.
+## Tổng quan
+Dự án Flutter mini-ecommerce, quản lý trạng thái bằng Provider, tích hợp Firebase Auth và Firestore, mô phỏng trải nghiệm Shopee/Lazada.
 
-## 🏗 KIẾN TRÚC DỰ ÁN (MVVM)
-Dự án được tổ chức theo mô hình MVVM (Model-View-ViewModel) để đảm bảo tính tách biệt giữa giao diện và logic:
-- `lib/models/`: Định nghĩa cấu trúc dữ liệu sản phẩm và giỏ hàng.
-- `lib/providers/`: Quản lý trạng thái hệ thống (Giỏ hàng, Logic tính tiền realtime).
-- `lib/services/`: Xử lý gọi API và xử lý dữ liệu mạng.
-- `lib/screens/`: Giao diện các màn hình (Home, Detail, Cart, Checkout).
-- `lib/widgets/`: Các thành phần giao diện dùng chung (Product Card, Custom Button).
+## Cấu trúc thư mục
+- `lib/models/`: Định nghĩa dữ liệu sản phẩm, giỏ hàng.
+- `lib/providers/`: Quản lý trạng thái (giỏ hàng, đồng bộ Firestore).
+- `lib/services/`: Xử lý API, dịch vụ mạng.
+- `lib/screens/`: Giao diện các màn hình (auth, home, detail, cart, checkout, orders, profile).
+- `lib/widgets/`: Thành phần UI dùng chung (product card, custom button).
+- `android/`, `ios/`, `web/`, `linux/`, `macos/`, `windows/`: Hỗ trợ đa nền tảng.
 
-## ✨ CÁC TÍNH NĂNG NỔI BẬT
-- [x] **Trang chủ:** SliverAppBar sticky, Carousel Slider, Infinite Scrolling (Cuộn để tải thêm).
-- [x] **Trang Chi tiết:** Hero Animation, BottomSheet chọn phân loại, đồng bộ số lượng Badge.
-- [x] **Giỏ hàng:** Logic Checkbox thông minh (Chọn tất cả/Chọn lẻ), tính tiền Realtime qua Provider.
-- [x] **Thanh toán:** Xử lý logic đặt hàng và lưu trữ lịch sử đơn mua qua SharedPreferences.
+## Chức năng chính
+- Đăng nhập/Đăng ký bằng Firebase Auth.
+- Trang chủ: SliverAppBar, Carousel, Infinite Scroll.
+- Trang chi tiết: Chọn phân loại, số lượng, hiệu ứng Hero.
+- Giỏ hàng: Checkbox chọn lẻ/tất cả, tính tiền realtime, đồng bộ Firestore.
+- Thanh toán: Chọn địa chỉ, phương thức, lưu đơn hàng vào Firestore.
+- Lịch sử đơn mua: Xem lại đơn hàng đã đặt.
+- Quản lý profile: Đổi địa chỉ, xem email.
 
-## 🛠 QUY TRÌNH PHÁT TRIỂN (DÀNH CHO THÀNH VIÊN)
-1. **Khởi tạo:** `flutter pub get` để cài đặt thư viện (`provider`, `http`, `carousel_slider`).
-2. **Lấy code mới nhất:** Luôn chạy `git pull origin main` trước khi bắt đầu.
-3. **Phát triển:** Tạo nhánh riêng `feature/[tên-tính-năng]` để làm việc.
-4. **Kiểm tra:** Đảm bảo không còn dòng gạch đỏ (Error) trước khi gửi Pull Request cho Leader.
+## Quy trình phát triển
+1. Chạy `flutter pub get` để cài thư viện (`provider`, `firebase_core`, `cloud_firestore`, `firebase_auth`, ...).
+2. Luôn cập nhật code mới nhất bằng `git pull origin main`.
+3. Phát triển trên nhánh riêng: `feature/[ten-tinh-nang]`.
+4. Kiểm tra lỗi, test UI trước khi gửi Pull Request.
+
+## Hướng dẫn chạy
+- Đảm bảo đã cấu hình Firebase (file `firebase_options.dart` được tạo tự động bởi FlutterFire CLI, không chỉnh sửa thủ công).
+- Chạy `flutter run` trên thiết bị hoặc trình duyệt.
+
+## Ghi chú
+- Giá tiền được chuẩn hoá hiển thị theo USD ($).
+- Dự án hỗ trợ đa nền tảng: Android, iOS, Web, Desktop.
 
 ## 🚀 HƯỚNG DẪN CÀI ĐẶT
 ```bash
