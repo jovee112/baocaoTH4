@@ -1,97 +1,101 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
 import '../../models/product_model.dart';
 import '../../providers/cart_providers.dart';
+import 'package:provider/provider.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final ProductModel product;
 
   const ProductDetailScreen({
-    super.key,
-    required this.product,
-  });
-
-  @override
-  State<ProductDetailScreen> createState() => _ProductDetailScreenState();
-}
-
-class _ProductDetailScreenState extends State<ProductDetailScreen> {
-  // State UI
-  late int currentImageIndex;
-  bool isExpandedDescription = false;
-
-  // Tùy chọn trong bottom sheet
-  String selectedSize = 'M';
-  String selectedColor = 'Đen';
-  int quantity = 1;
-
-  final List<String> sizes = ['S', 'M', 'L'];
-  final List<String> colors = ['Đen', 'Trắng', 'Đỏ', 'Xanh'];
-  final List<Color> colorValues = [
-    Colors.black,
-    Colors.white,
-    Colors.red,
-    Colors.blue,
-  ];
-
-  // Mock nhiều ảnh từ ảnh chính
-  late List<String> productImages;
-
-  bool get _isClothing =>
-      widget.product.category.toLowerCase().contains('clothing');
-
-  @override
-  void initState() {
-    super.initState();
-    currentImageIndex = 0;
-    productImages = [
-      widget.product.image,
-      '${widget.product.image}?view=2',
-      '${widget.product.image}?view=3',
-    ];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chi tiết sản phẩm'),
-        elevation: 0,
-      ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).padding.bottom + 100,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildImageSlider(),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildProductTitle(),
-                      const SizedBox(height: 12),
-                      _buildRatingSection(),
-                      const SizedBox(height: 16),
-                      _buildPriceSection(),
-                      const SizedBox(height: 16),
-                      _buildVariationSection(),
-                      const SizedBox(height: 16),
-                      _buildDescriptionSection(),
-                    ],
-                  ),
-                ),
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        final price = widget.product.price;
+        final total = price * quantity;
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Thanh toán mua ngay'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Sản phẩm: ' + widget.product.title),
+              if (_isClothing) ...[
+                Text('Kích cỡ: ' + size),
+                Text('Màu sắc: ' + color),
               ],
-            ),
+              Text('Số lượng: ' + quantity.toString()),
+              Text('Đơn giá: ' + '4' + price.toStringAsFixed(2)),
+              Text('Tổng tiền: ' + '4' + total.toStringAsFixed(2)),
+              const SizedBox(height: 16),
+              const Text('Nhập thông tin giao hàng:'),
+              TextField(
+                controller: addressController,
+                decoration: const InputDecoration(
+                  labelText: 'Địa chỉ giao hàng',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: phoneController,
+                decoration: const InputDecoration(
+                  labelText: 'Số điện thoại',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.phone,
+              ),
+            ],
           ),
-          Positioned(
-            bottom: 0,
-            left: 0,
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Cancel, do not save anything
+              },
+              child: const Text('Huỷ'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final address = addressController.text.trim();
+                final phone = phoneController.text.trim();
+                if (address.isEmpty || phone.isEmpty || phone.length < 9) {
+                  ScaffoldMessenger.of(this.context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Vui lòng nhập đầy đủ thông tin hợp lệ!'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+                // Tạo đơn hàng tạm thời (chưa lưu vào giỏ)
+                final order = {
+                  'productId': widget.product.id,
+                  'title': widget.product.title,
+                  'size': _isClothing ? size : null,
+                  'color': _isClothing ? color : null,
+                  'quantity': quantity,
+                  'address': address,
+                  'phone': phone,
+                  'price': '4' + price.toStringAsFixed(2),
+                  'total': '4' + total.toStringAsFixed(2),
+                  'timestamp': DateTime.now().toIso8601String(),
+                };
+                // TODO: Gửi order lên server hoặc Firestore
+                Navigator.pop(context); // Close dialog
+                ScaffoldMessenger.of(this.context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Đặt mua ngay thành công!'),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+              },
+              child: const Text('Thanh toán'),
+            ),
+          ],
+        );
+      },
+    );
             right: 0,
             child: _buildBottomBar(context),
           ),
@@ -414,21 +418,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           Expanded(
-            child: OutlinedButton(
+            child: ElevatedButton(
               onPressed: () => _showAddToCartBottomSheet(context),
-              style: OutlinedButton.styleFrom(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                side: const BorderSide(color: Colors.red, width: 2),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
               child: const Text(
-                'Thêm vào giỏ',
+                'Thêm vào giỏ hàng',
                 style: TextStyle(
-                  color: Colors.red,
+                  color: Colors.white,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -441,12 +445,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Chức năng Mua ngay sẽ được cập nhật'),
+                    content: Text('Chức năng đang phát triển'),
+                    backgroundColor: Colors.orange,
                   ),
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
+                backgroundColor: Colors.orange,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -688,7 +693,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             quantity = tempQuantity;
                           });
 
-                          final cartProvider = context.read<CartProvider>();
+                          final cartProvider =
+                              Provider.of<CartProvider>(context, listen: false);
                           cartProvider.addToCartWithSelection(
                             widget.product,
                             quantity: tempQuantity,
@@ -753,3 +759,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 }
+
+  // Buy Now logic and dead code removed
+

@@ -2,6 +2,8 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../../models/product_model.dart';
 import '../../providers/cart_providers.dart';
 import '../../services/product_service.dart';
@@ -663,6 +665,33 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   );
                 },
+              ),
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.account_circle, color: Colors.black),
+                onSelected: (value) {
+                  if (value == 'profile') {
+                    Navigator.of(context).pushNamed('/profile');
+                  } else if (value == 'orders') {
+                    Navigator.of(context).pushNamed('/orders');
+                  } else if (value == 'logout') {
+                    FirebaseAuth.instance.signOut();
+                    Navigator.of(context).pushReplacementNamed('/auth');
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem<String>(
+                    value: 'profile',
+                    child: Text('Thông tin tài khoản'),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'orders',
+                    child: Text('Đơn mua'),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'logout',
+                    child: Text('Đăng xuất'),
+                  ),
+                ],
               ),
             ],
           ),
