@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/product_model.dart';
 import '../../providers/cart_providers.dart';
+import 'dart:ui'; // Thêm dòng này vào trên cùng của file detail_screen.dart
 
 class ProductDetailScreen extends StatefulWidget {
   final ProductModel product;
@@ -142,29 +143,41 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         SizedBox(
           height: 320,
           child: PageView.builder(
+            // Thêm cái này để vuốt được bằng chuột trên trình duyệt
+            scrollBehavior: AppScrollBehavior(),
             onPageChanged: (i) => setState(() => _currentImageIndex = i),
             itemCount: 3,
-            itemBuilder: (context, index) => Hero(
-              tag: 'product-image-${widget.product.id}',
-              child: Image.network(widget.product.image, fit: BoxFit.contain),
-            ),
+            itemBuilder: (context, index) {
+              // Kiểm tra: Chỉ tấm ảnh đầu tiên mới dùng Hero tag
+              if (index == 0) {
+                return Hero(
+                  tag: 'product-image-${widget.product.id}',
+                  child:
+                      Image.network(widget.product.image, fit: BoxFit.contain),
+                );
+              }
+              // Các ảnh tiếp theo trả về Image bình thường, không bọc Hero
+              return Image.network(widget.product.image, fit: BoxFit.contain);
+            },
           ),
         ),
+        const SizedBox(height: 10), // Khoảng cách nhỏ giữa ảnh và dots
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
-              3,
-              (index) => Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: _currentImageIndex == index ? 20 : 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: _currentImageIndex == index
-                          ? Colors.black
-                          : Colors.grey.shade300,
-                    ),
-                  )),
+            3,
+            (index) => Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              width: _currentImageIndex == index ? 20 : 8,
+              height: 8,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: _currentImageIndex == index
+                    ? Colors.black
+                    : Colors.grey.shade300,
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -427,4 +440,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       ),
     );
   }
+}
+
+// Class chuẩn để fix lỗi vuốt chuột trên Web/Edge
+class AppScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse, // Sửa thành dòng này
+        PointerDeviceKind.trackpad,
+      };
 }
